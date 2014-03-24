@@ -1,0 +1,284 @@
+#data MYWorld_votes_all.csv downloaded at Mar 13 2014 from http://54.227.246.164/dataset/
+
+> summary(myword)
+                         date             source         partner_code   
+                           :  14010   apps   :  6317           :364843  
+ 2013-05-06 15:36:30       :      8   offline:660967   MDGsNG  :145252  
+ 2013-11-04 20:28:08       :      8   sms    :375268   geodrc  :127423  
+ 2013-03-20 09:53:52.828000:      7   website:447264   biNu    :108252  
+ 2013-05-06 15:08:34       :      7                    WNTA    :100620  
+ 2013-05-15 13:48:43       :      7                    YemenIVR: 98027  
+ (Other)                   :1475769                    (Other) :545399  
+    country            age                 gender            education        
+ Min.   :   1.0   Min.   :-8.386e+10   Min.   :    0.000   Min.   :    0.000  
+ 1st Qu.:  77.0   1st Qu.: 1.700e+01   1st Qu.:    1.000   1st Qu.:    2.000  
+ Median : 120.0   Median : 2.300e+01   Median :    1.000   Median :    3.000  
+ Mean   : 110.7   Mean   :-8.205e+04   Mean   :    1.449   Mean   :    2.925  
+ 3rd Qu.: 162.0   3rd Qu.: 3.400e+01   3rd Qu.:    2.000   3rd Qu.:    4.000  
+ Max.   : 262.0   Max.   : 2.009e+03   Max.   :  113.000   Max.   : 1983.000  
+ NA's   :3450.0   NA's   : 2.535e+04   NA's   :19568.000   NA's   :39058.000  
+   priority1       priority2        priority3        priority4      
+ Min.   :100.0   Min.   : 101.0   Min.   : 102.0   Min.   :  103.0  
+ 1st Qu.:101.0   1st Qu.: 103.0   1st Qu.: 105.0   1st Qu.:  106.0  
+ Median :102.0   Median : 104.0   Median : 106.0   Median :  109.0  
+ Mean   :102.1   Mean   : 104.2   Mean   : 106.1   Mean   :  108.4  
+ 3rd Qu.:103.0   3rd Qu.: 105.0   3rd Qu.: 107.0   3rd Qu.:  110.0  
+ Max.   :115.0   Max.   : 115.0   Max.   : 115.0   Max.   :  115.0  
+ NA's   :436.0   NA's   :5346.0   NA's   :7525.0   NA's   :12588.0  
+   priority5         priority6      
+ Min.   :  104.0   Min.   :  105.0  
+ 1st Qu.:  109.0   1st Qu.:  113.0  
+ Median :  111.0   Median :  115.0  
+ Mean   :  111.1   Mean   :  113.8  
+ 3rd Qu.:  113.0   3rd Qu.:  115.0  
+ Max.   :  115.0   Max.   :  115.0  
+ NA's   :31248.0   NA's   :74130.0  
+                                suggested_priority
+                                         :697072  
+ nan                                     :581484  
+ INVEST IN EDUCATION (6%) AND HEALTH (5%): 21222  
+ 6% Education 5% Health                  :  9954  
+                                         :  8010  
+ invest in education (6%) and health (5%):  7759  
+ (Other)                                 :164315  
+                                                                                                                                                                                                                                                                                vote_reason     
+                                                                                                                                                                                                                                                                                      :1484562  
+ Everyone needs water and food to live. Also, everyone needs education and job opportunities to live like a HUMAN. And a protection against crime and violence is needed to live without any daily FEAR of becoming dead, and this reason is also suitable for the variant HEALTHCARE.:      2  
+ Mejor protección para los animales                                                                                                                                                                                                                                                   :      2  
+ test                                                                                                                                                                                                                                                                                 :      2  
+ To make the world a better place.                                                                                                                                                                                                                                                    :      2  
+ *****                                                                                                                                                                                                                                                                                :      1  
+ (Other)                                                                                                                                                                                                                                                                              :   5245  
+ data_note     
+ Mode:logical  
+ NA's:1489816  
+               
+#calculate the conditional marginals p(xi|x_j) for all pair of x_i,x_j,first get the priority only data
+
+> priorities <- myword[,8:13]
+> summary(priorities)
+   priority1       priority2        priority3        priority4      
+ Min.   :100.0   Min.   : 101.0   Min.   : 102.0   Min.   :  103.0  
+ 1st Qu.:101.0   1st Qu.: 103.0   1st Qu.: 105.0   1st Qu.:  106.0  
+ Median :102.0   Median : 104.0   Median : 106.0   Median :  109.0  
+ Mean   :102.1   Mean   : 104.2   Mean   : 106.1   Mean   :  108.4  
+ 3rd Qu.:103.0   3rd Qu.: 105.0   3rd Qu.: 107.0   3rd Qu.:  110.0  
+ Max.   :115.0   Max.   : 115.0   Max.   : 115.0   Max.   :  115.0  
+ NA's   :436.0   NA's   :5346.0   NA's   :7525.0   NA's   :12588.0  
+   priority5         priority6      
+ Min.   :  104.0   Min.   :  105.0  
+ 1st Qu.:  109.0   1st Qu.:  113.0  
+ Median :  111.0   Median :  115.0  
+ Mean   :  111.1   Mean   :  113.8  
+ 3rd Qu.:  113.0   3rd Qu.:  115.0  
+ Max.   :  115.0   Max.   :  115.0  
+ NA's   :31248.0   NA's   :74130.0
+#The data are factors, so the statistics doesn't make too much sense, but we can
+tell that there is significant amount of  missing data for priorities.
+#To calculate these conditional probability estimation, we need to do a lot of counding, R is not good at this kind of job,let's store the data into a text and process it using Python.
+> write.csv(priorities,"priorities.csv",row.names=F,quote=F)
+#the priorities.csv is then split into two files based on the row numbers
+./priorityNB.py train.csv train_NB_model
+./predictNBAll.py test.csv train_NB_model > test_predNB_all.csv
+ ./count_result.py test_predNB_all.csv 
+
+nehit in top 2: 342334
+twohit in top 2: 16358
+onehit in top 3: 400395
+twohit in top 3: 64363
+onehit in top 4: 416925
+twohit in top 4: 130402
+onehit in top 5: 403772
+twohit in top 5: 200703
+onehit in top 6: 355315
+twohit in top 6: 299197
+onehit in top 7: 293701
+twohit in top 7: 392739
+onehit in top 8: 239059
+twohit in top 8: 467500
+onehit in top 9: 183259
+twohit in top 9: 536680
+
+#calculate expected hits froma random model
+//prob of 2 correct prediction
+>choose(10,0)/choose(12,2)
+[1] 0.01515152
+> choose(10,1)/choose(12,3)
+[1] 0.04545455
+> choose(10,2)/choose(12,4)
+[1] 0.09090909
+> choose(10,3)/choose(12,5)
+[1] 0.1515152
+> choose(10,4)/choose(12,6)
+[1] 0.2272727
+
+//prob of no correct prediction
+> choose(10,2)/choose(12,2)
+[1] 0.6818182
+> choose(10,3)/choose(12,3)
+[1] 0.5454545
+> choose(10,4)/choose(12,4)
+[1] 0.4242424
+> choose(10,5)/choose(12,5)
+[1] 0.3181818
+> choose(10,6)/choose(12,6)
+[1] 0.2272727
+
+//prob of 1 correct prediction
+> 1-choose(10,0)/choose(12,2)-choose(10,2)/choose(12,2)
+[1] 0.3030303
+> 1-choose(10,1)/choose(12,3)-choose(10,3)/choose(12,3)
+[1] 0.4090909
+> 1-choose(10,2)/choose(12,4)-choose(10,4)/choose(12,4)
+[1] 0.4848485
+> 1-choose(10,3)/choose(12,5)-choose(10,5)/choose(12,5)
+[1] 0.530303
+> 1-choose(10,4)/choose(12,6)-choose(10,6)/choose(12,6)
+[1] 0.5454545
+
+
+
+#The classifier based method, in the first step, only the priorities are considered features. First using python code to "reshape" the data to turn the 6 priorities into 16 dimensional binary vectors.
+./reshape_data.py train.csv > train_binary.csv
+./reshape_data.py test.csv > test_binary.csv
+
+#First version using svm from package 'e1071'
+train <- read.csv("train_binary.csv")
+test <- read.csv("test_binary.csv")
+
+#the training set and the testing set are both too large, sample 10000 data points of each to make the problem more pratical
+ sample_index <- sample(1:dim(train)[1],10000)
+ train_sample <- train[sample_index,]
+test_sample_index <- sample(1:dim(test)[1],10000)
+ test_sample <- test[test_sample_index,]
+svm0 <- svm(X100~.,train_sample)
+table(predict(svm0,test_sample),test_sample$X100)
+
+#generate R code to do svm for each priority on the binary features of other priorities in shell
+for i in $(seq 0 1 9); do echo "svm$i <- svm(X10$i~., train_sample)"; echo "table(predict(svm$i,test_sample),test_sample\$X10$i)"; done
+for i in $(seq 10 1 15); do echo "svm$i <- svm(X1$i~., train_sample)"; echo "table(predict(svm$i,test_sample),test_sample\$X1$i)"; done
+
+#The single priority predictor performs very good, generally 95% accuracy for all the 16 priorities.
+vm0 <- svm(X100~., train_sample)
+> table(predict(svm0,test_sample),test_sample$X100)
+   
+       N    Y
+  N 7868   30
+  Y  345 1757
+> svm1 <- svm(X101~., train_sample)
+> table(predict(svm1,test_sample),test_sample$X101)
+   
+       N    Y
+  N 6832    0
+  Y  411 2757
+> svm2 <- svm(X102~., train_sample)
+> table(predict(svm2,test_sample),test_sample$X102)
+   
+       N    Y
+  N 6729    0
+  Y  332 2939
+> svm3 <- svm(X103~., train_sample)
+> table(predict(svm3,test_sample),test_sample$X103)
+   
+       N    Y
+  N 5519    0
+  Y  217 4264
+> svm4 <- svm(X104~., train_sample)
+> table(predict(svm4,test_sample),test_sample$X104)
+   
+       N    Y
+  N 4196    0
+  Y  158 5646
+> svm5 <- svm(X105~., train_sample)
+> table(predict(svm5,test_sample),test_sample$X105)
+   
+       N    Y
+  N 2922    0
+  Y  149 6929
+> svm6 <- svm(X106~., train_sample)
+> table(predict(svm6,test_sample),test_sample$X106)
+   
+       N    Y
+  N 4687    0
+  Y  208 5105
+> svm7 <- svm(X107~., train_sample)
+> table(predict(svm7,test_sample),test_sample$X107)
+   
+       N    Y
+  N 7258    0
+  Y  410 2332
+> svm8 <- svm(X108~., train_sample)
+> table(predict(svm8,test_sample),test_sample$X108)
+   
+       N    Y
+  N 7403    0
+  Y  411 2186
+> svm9 <- svm(X109~., train_sample)
+> table(predict(svm9,test_sample),test_sample$X109)
+   
+       N    Y
+  N 5232    0
+  Y  377 4391
+> svm10 <- svm(X110~., train_sample)
+> table(predict(svm10,test_sample),test_sample$X110)
+   
+       N    Y
+  N 6563    0
+  Y  422 3015
+> svm11 <- svm(X111~., train_sample)
+> table(predict(svm11,test_sample),test_sample$X111)
+   
+       N    Y
+  N 5367    0
+  Y  400 4233
+> svm12 <- svm(X112~., train_sample)
+> table(predict(svm12,test_sample),test_sample$X112)
+   
+       N    Y
+  N 7219    0
+  Y  440 2341
+> svm13 <- svm(X113~., train_sample)
+> table(predict(svm13,test_sample),test_sample$X113)
+   
+       N    Y
+  N 6631    0
+  Y  419 2950
+> svm14 <- svm(X114~., train_sample)
+> table(predict(svm14,test_sample),test_sample$X114)
+   
+       N    Y
+  N 6570    0
+  Y  374 3056
+> svm15 <- svm(X115~., train_sample)
+> table(predict(svm15,test_sample),test_sample$X115)
+   
+       N    Y
+  N 4437    0
+  Y  315 5248
+
+ for i in $(seq 0 1 9); do  echo "table(predict(svm$i,test_4_sample),test_4_sample\$X10$i)"; done
+ for i in $(seq 10 1 15); do echo "table(predict(svm$i,test_4_sample),test_4_sample\$X1$i)"; done
+
+Collective filtering model.
+#the rows contain "NA" in both train.csv and test.csv are removed, and we get 2 new file 
+./Four_tuple.py train_noNA.csv 4-tuple-count-train 4-tuple-dict-train 4-tuple-train-model 
+./Four_tuple_predict.py test_noNA.csv 4-tuple-train-model > test_4-tuple_result
+./count_result.py test_4-tuple_result 
+
+nehit in top 2: 335281
+twohit in top 2: 22759
+onehit in top 3: 383561
+twohit in top 3: 75212
+onehit in top 4: 393383
+twohit in top 4: 141412
+onehit in top 5: 383514
+twohit in top 5: 211298
+onehit in top 6: 338776
+twohit in top 6: 299392
+onehit in top 7: 282106
+twohit in top 7: 384195
+onehit in top 8: 220195
+twohit in top 8: 465941
+onehit in top 9: 162745
+twohit in top 9: 536869
+
